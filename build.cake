@@ -16,6 +16,7 @@
 
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
+var linkSources = Argument<bool>("linksources", false);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,7 +166,19 @@ Task("Build")
 	{
 		Configuration = configuration,
 		NoRestore = true,
-		ArgumentCustomization = args => args.Append("/p:SemVer=" + versionInfo.LegacySemVerPadded)
+		ArgumentCustomization = args => 
+		{
+			args.Append("/p:SemVer=" + versionInfo.LegacySemVerPadded);
+			if (linkSources)
+			{
+				args.Append("/p:DebugType=embedded /p:SourceLinkCreate=true");
+			}
+			else
+			{
+				args.Append("/p:DebugType=full");	// Currently OpenCover only supports 'full'
+			}
+			return args;
+		}
 	});
 });
 
